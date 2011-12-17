@@ -42,6 +42,7 @@ class StreamMonitorThread(threading.Thread):
             if sleep_time >= 3 * 60:
                 return None
             time.sleep(sleep_time)
+            sleep_time = sleep_time ^ 2
             streams = self.api_server_model.get()
             
         return streams
