@@ -3,7 +3,6 @@ Created on 2011-12-17
 
 @author: dista
 '''
-import asyncore, socket
 from http_client import HttpClient
 
 class MediaServerAdminQueryer(HttpClient):
