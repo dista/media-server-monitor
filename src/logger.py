@@ -8,7 +8,7 @@ from exception import *
 import time, sys
 
 class Logger:
-    def __init__(self, log_path, level):
+    def __init__(self, log_path = None, level = 0):
         '''
         level: 0 -- suppress all
                1 -- debug
@@ -16,6 +16,11 @@ class Logger:
                3 -- warn
         '''
         self.level = level
+        self.log_path = log_path
+        
+        if log_path == None:
+            self.log_fd = sys.stderr
+            
         self.log_fd = None
         try:
             self.log_fd = open(log_path)
@@ -23,6 +28,9 @@ class Logger:
             raise LogError(e)
     
     def close(self):
+        if self.log_path == None:
+            return
+        
         if self.log_fd != None:
             try:
                 self.log_fd.close()
