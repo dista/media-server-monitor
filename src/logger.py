@@ -9,6 +9,13 @@ import time, sys
 
 class Logger:
     def __init__(self, log_path, level):
+        '''
+        level: 0 -- suppress all
+               1 -- debug
+               2 -- error
+               3 -- warn
+        '''
+        self.level = level
         self.log_fd = None
         try:
             self.log_fd = open(log_path)
@@ -31,10 +38,16 @@ class Logger:
         try:
             self.log_fd.write("[%s]%s" % (tm, msg))
         except IOError:
-            print sys.stderr, "Write log failed!" 
+            print sys.stderr, "Write log failed!"
+            
+    def debug(self, msg):
+        if self.level > 0:
+            self.log("[debug] %s" % msg) 
            
     def warn(self, msg):
-        self.log("[warn] %s" % msg)
+        if self.level > 2:
+            self.log("[warn] %s" % msg)
     
     def error(self, msg):
-        self.log("[error] %s" % msg)
+        if self.level > 1:
+            self.log("[error] %s" % msg)
