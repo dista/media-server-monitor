@@ -6,6 +6,7 @@ Created on 2011-12-17
 from exception import *
 
 import time, sys
+import threading
 
 class Logger:
     def __init__(self, log_path = None, level = 0):
@@ -26,6 +27,8 @@ class Logger:
             self.log_fd = open(log_path)
         except IOError, e:
             raise LogError(e)
+        
+        self.lock = threading.Lock()
     
     def close(self):
         if self.log_path == None:
@@ -42,11 +45,15 @@ class Logger:
         if self.log_fd == None:
             return
         
+        self.lock.acquire()
+        
         tm = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         try:
             self.log_fd.write("[%s]%s" % (tm, msg))
         except IOError:
             print sys.stderr, "Write log failed!"
+        finally:
+            self.lock.release()
             
     def debug(self, msg):
         if self.level > 0:
