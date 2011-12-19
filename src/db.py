@@ -5,16 +5,23 @@ Created on 2011-12-17
 '''
 
 import threading
+import MySQLdb
 
 class DbConnection:
-    def __init__(self, id, host, port, name, password, logger = None):
+    timeout = 60
+    
+    def __init__(self, id, host, port, name, password, db_name, logger = None):
         self.id = id
         self.host = host
         self.port = port
         self.name = name
         self.password = password
+        self.db_name = db_name
         self.logger = logger
         self.is_used = False
+        
+        self.conn = MySQLdb.connect(host, name, password, db_name, DbConnection.timeout, \
+                                    charset = "utf8", use_unicode = False)
     
     def is_alive(self):
         pass
@@ -39,10 +46,11 @@ class DbPool:
     Python Mysqldb is not thread safe, we must make sure that
     threads won't share DbConnection
     '''
-    def __init__(self, max_db, host, port, name, password, logger):
+    def __init__(self, max_db, host, port, name, password, db_name, logger):
         self.host = host
         self.port = port
         self.name = name
+        self.db_name = db_name
         self.password = password
         self.logger = logger
         self.max_db = max_db
@@ -67,9 +75,17 @@ class DbPool:
         
         if self.current_dbc_number < self.max_db:
             con_id = self._gen_con_id()
-            ret = DbConnection(con_id, self.host, self.port, self.name, self.password, self.logger)
-            self.current_dbc_number += 1
-            self.lock.release()
+            
+            ret = None
+            try:
+                ret = DbConnection(con_id, self.host, self.port, self.name, self.password, self.db_name, self.logger)
+                self.current_dbc_number += 1
+                self.pools.append(ret)
+            except MySQLdb.MySQLError:
+                pass
+            finally:
+                self.lock.release()
+            
             return ret
         
         
