@@ -7,7 +7,7 @@ Created on 2011-12-17
 import threading
 import MySQLdb
 
-class DbConnection:
+class DbConnection(MySQLdb.Connection):
     timeout = 60
     
     def __init__(self, id, host, port, name, password, db_name, logger = None):
@@ -20,24 +20,30 @@ class DbConnection:
         self.logger = logger
         self.is_used = False
         
-        self.conn = MySQLdb.connect(host, name, password, db_name, DbConnection.timeout, \
+        MySQLdb.Connection.__init__(self, host, name, password, db_name, DbConnection.timeout, \
                                     charset = "utf8", use_unicode = False)
     
+        self.is_alive = True
+        
     def is_alive(self):
-        pass
+        return self.is_alive
     
     def get_id(self):
         return self.id
     
+    def set_alive(self, is_alive):
+        '''
+        it is the user's duty to set it to un alive if
+        they encount Mysql error about connection
+        '''
+        self.is_alive = is_alive
+        
     def is_used(self):
         return self.is_used
     
     def set_used_status(self, is_used):
         self.is_used = is_used
         
-    def query(self, sql):
-        pass
-    
     def close(self):
         pass
     
