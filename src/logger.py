@@ -9,7 +9,7 @@ import time, sys
 import threading
 
 class LogLevel:
-    FROHABIT = 0
+    SUPPRESS = 0
     DEBUG    = 1
     ERROR    = 2
     WARN     = 4
