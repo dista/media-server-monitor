@@ -8,6 +8,13 @@ from exception import *
 import time, sys
 import threading
 
+class LogLevel:
+    FROHABIT = 0
+    DEBUG    = 1
+    ERROR    = 2
+    WARN     = 4
+    ALL      = 7
+
 class Logger:
     line_sep_chars = "\n"
 
@@ -16,7 +23,7 @@ class Logger:
         level: 0 -- suppress all
                1 -- debug
                2 -- error
-               3 -- warn
+               4 -- warn
         '''
         self.lock = threading.Lock()
         self.level = level
@@ -59,13 +66,13 @@ class Logger:
             self.lock.release()
             
     def debug(self, msg):
-        if self.level > 0:
+        if self.level & LogLevel.DEBUG:
             self.log("[debug] %s" % msg) 
            
     def warn(self, msg):
-        if self.level > 2:
+        if self.level & LogLevel.WARN:
             self.log("[warn] %s" % msg)
     
     def error(self, msg):
-        if self.level > 1:
+        if self.level & LogLevel.ERROR:
             self.log("[error] %s" % msg)
