@@ -9,6 +9,8 @@ import time, sys
 import threading
 
 class Logger:
+    line_sep_chars = "\n"
+
     def __init__(self, log_path = None, level = 0):
         '''
         level: 0 -- suppress all
@@ -16,19 +18,20 @@ class Logger:
                2 -- error
                3 -- warn
         '''
+        self.lock = threading.Lock()
         self.level = level
         self.log_path = log_path
         
         if log_path == None:
             self.log_fd = sys.stderr
+            return
             
         self.log_fd = None
         try:
-            self.log_fd = open(log_path)
+            # if the log file is not exits, it will be created
+            self.log_fd = open(log_path, 'a+')
         except IOError, e:
             raise LogError(e)
-        
-        self.lock = threading.Lock()
     
     def close(self):
         if self.log_path == None:
@@ -49,7 +52,7 @@ class Logger:
         
         tm = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         try:
-            self.log_fd.write("[%s]%s" % (tm, msg))
+            self.log_fd.write("[%s]%s%s" % (tm, msg, Logger.line_sep_chars))
         except IOError:
             print sys.stderr, "Write log failed!"
         finally:

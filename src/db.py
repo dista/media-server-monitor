@@ -6,27 +6,24 @@ Created on 2011-12-17
 
 import threading
 import MySQLdb
+import traceback
+from MySQLdb import connections
 
-class DbConnection(MySQLdb.Connection):
+class DbConnection(connections.Connection):
     timeout = 60
     
     def __init__(self, id, host, port, name, password, db_name, logger = None):
         self.id = id
-        self.host = host
-        self.port = port
-        self.name = name
-        self.password = password
-        self.db_name = db_name
         self.logger = logger
-        self.is_used = False
+        self._is_used = False
         
-        MySQLdb.Connection.__init__(self, host, name, password, db_name, DbConnection.timeout, \
+        connections.Connection.__init__(self, host = host, user = name, passwd = password, db = db_name, port = port, connect_timeout = DbConnection.timeout, \
                                     charset = "utf8", use_unicode = False)
     
-        self.is_alive = True
+        self._is_alive = True
         
     def is_alive(self):
-        return self.is_alive
+        return self._is_alive
     
     def get_id(self):
         return self.id
@@ -36,13 +33,13 @@ class DbConnection(MySQLdb.Connection):
         it is the user's duty to set it to un alive if
         they encount Mysql error about connection
         '''
-        self.is_alive = is_alive
+        self._is_alive = is_alive
         
     def is_used(self):
-        return self.is_used
+        return self._is_used
     
     def set_used_status(self, is_used):
-        self.is_used = is_used
+        self._is_used = is_used
         
     def close(self):
         pass
@@ -70,15 +67,66 @@ class DbPool:
         self.event_queue_lock = threading.Lock()
     
     def get_one(self):
+        self.logger.debug("%s AC lock" % threading.current_thread())
         self.lock.acquire()
+        self.logger.debug("%s ACED lock" % threading.current_thread())
         
         ret = self._get_alive_connection(self.pools)
         
-        if not ret:
+        if ret:
             ret.set_used_status(True)
             self.lock.release()
             return ret
         
+        ret = self._gen_one_connection()
+        self.logger.debug("%s RL lock" % threading.current_thread())
+        self.lock.release()
+        self.logger.debug("%s RLED lock" % threading.current_thread())
+
+        if ret != None:
+            return ret
+        
+        while True:
+            ev = threading.Event()
+            
+            self.logger.debug("%s AC queue lock" % threading.current_thread())
+            self.event_queue_lock.acquire()
+            self.logger.debug("%s ACED queue lock" % threading.current_thread())
+            self.event_queue.append(ev)
+            self.logger.debug("%s RL queue lock" % threading.current_thread())
+            self.event_queue_lock.release()
+            self.logger.debug("%s RLED queue lock" % threading.current_thread())
+            
+            self.logger.debug("wait for event")
+            ev.wait()
+            self.logger.debug("event wait done")
+            
+            self.logger.debug("%s AC top pool lock" % threading.current_thread())
+            self.top_pools_lock.acquire()
+            self.logger.debug("%s ACED top pool lock" % threading.current_thread())
+            ret = self._get_alive_connection(self.top_pools)
+            self.logger.debug("GOT connection from top_pools")
+            if ret:
+                ret.set_used_status(True)
+            self.logger.debug("%s RL top pool lock" % threading.current_thread())
+            self.top_pools_lock.release()
+            self.logger.debug("%s RLED top pool lock" % threading.current_thread())
+            if ret:
+                return ret
+            else:
+                # the connection user released may lost connection
+                self.logger.debug("%s AC lock" % threading.current_thread())
+                self.lock.acquire()
+                self.logger.debug("%s ACED lock" % threading.current_thread())
+                ret = self._gen_one_connection()
+                self.logger.debug("%s RL lock" % threading.current_thread())
+                self.lock.release()
+                self.logger.debug("%s RLED lock" % threading.current_thread())
+
+                if ret:
+                    return ret
+
+    def _gen_one_connection(self):
         if self.current_dbc_number < self.max_db:
             con_id = self._gen_con_id()
             
@@ -87,39 +135,26 @@ class DbPool:
                 ret = DbConnection(con_id, self.host, self.port, self.name, self.password, self.db_name, self.logger)
                 self.current_dbc_number += 1
                 self.pools.append(ret)
+                ret.set_used_status(True)
             except MySQLdb.MySQLError:
-                pass
-            finally:
-                self.lock.release()
+                self.logger.debug("Mysql Error, %s" % traceback.format_exc())
             
             return ret
-        
-        
-        while True:
-            ev = threading.Event()
-            
-            self.event_queue_lock.acquire()
-            self.event_queue.append(ev)
-            self.event_queue_lock.release()
-            
-            ev.wait()
-            
-            self.top_pools_lock.acquire()
-            ret = self._get_alive_connection(self.top_pools)
-            self.top_pools_lock.release()
-            if ret:
-                return ret
-                
+        else:
+            return None
             
     def release(self, db_connection):
-        if not db_connection.is_alive():
-            return
-        
         in_top = self._is_connection_in_top(db_connection)
         
-        self.event_queue_lock.acquire()
+        self.logger.debug("%s AC lock" % threading.current_thread())
         self.lock.acquire()
+        self.logger.debug("%s ACED lock" % threading.current_thread())
+        self.logger.debug("%s AC queue lock" % threading.current_thread())
+        self.event_queue_lock.acquire()
+        self.logger.debug("%s ACED queue lock" % threading.current_thread())
+        self.logger.debug("%s AC top pool lock" % threading.current_thread())
         self.top_pools_lock.acquire()
+        self.logger.debug("%s ACED top pool lock" % threading.current_thread())
         
         db_connection.set_used_status(False)
         
@@ -130,6 +165,7 @@ class DbPool:
                 self.top_pools.append(db_connection)
                 self.pools.remove(db_connection)
                 
+            self.logger.debug("event is notified")
             ev.set()
         else:
             if in_top:
@@ -137,19 +173,22 @@ class DbPool:
                 self.pools.append(db_connection)
                 
 
-        self.top_pools_lock.lock()
+        self.logger.debug("%s RL top pool lock" % threading.current_thread())
+        self.top_pools_lock.release()
+        self.logger.debug("%s RLED top pool lock" % threading.current_thread())
+        self.logger.debug("%s RL queue lock" % threading.current_thread())
         self.event_queue_lock.release()
+        self.logger.debug("%s RLED queue lock" % threading.current_thread())
+        self.logger.debug("%s RL lock" % threading.current_thread())
         self.lock.release()
+        self.logger.debug("%s RLED lock" % threading.current_thread())
             
     def _is_connection_in_top(self, connection):
         try:
-            if self.top_pools.index(connection):
-                return True
+            self.top_pools.index(connection)
+            return True
         except:
             return False
-    
-    def _release_to_pool(self, db_connection, pool):
-        pass        
     
     def _gen_con_id(self):
         self.con_id += 1
@@ -170,9 +209,10 @@ class DbPool:
         
         return ret
     
-    def _remove_un_active_connections(self, pool, un_alive_connections):
+    def _remove_un_alive_connections(self, pool, un_alive_connections):
         for con in un_alive_connections:
             pool.remove(con)
+            self.current_dbc_number -= 1
             try:
                 con.close()
             except Exception:
