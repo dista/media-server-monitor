@@ -1,0 +1,32 @@
+HTTP/1.1 200 OK
+Connection: close
+Date: Wed, 21 Dec 2011 07:11:54 GMT
+Content-Type: text/plain
+Expires: Mon, 26 Jul 1997 05:00:00 GMT
+Server: TVie TSS/v2.0.0.0 (ubuntu)
+Content-Length: 573
+Last-Modified: Wed, 21 Dec 2011 07:11:54 GMT
+Pragma: no-cache
+Cache-Control: no-store, must-revalidate
+
+total_gops: 244
+upstream_opened_count: 1
+upstream_connected_count: 1
+upstream_connection_fail_count: 0
+upstream_bytes_received: 216206
+clients_connected: 0
+total_clients_served: 0
+total_bytes_sent: 0
+live_delay_ms: -282
+average_upstream_kbps: 1465840.000000
+average_downstream_kbps: 0.000000
+stream_info_audiodatarate: 47
+stream_info_videodatarate: 354
+stream_info_audiocodecid: 10
+stream_info_audiosamplesize: 16
+stream_info_audiosamplerate: 44100
+stream_info_stereo: 1
+stream_info_videocodecid: 7
+stream_info_framerate: 24
+stream_info_width: 1024
+stream_info_height: 576

@@ -6,3 +6,6 @@ Created on 2011-12-18
 
 class LogError(Exception):
     pass
+
+class URIError(Exception):
+    pass
