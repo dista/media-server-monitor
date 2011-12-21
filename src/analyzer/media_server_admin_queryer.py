@@ -20,4 +20,6 @@ class MediaServerAdminQueryer(HttpClient):
 
         if not has_error:
             self.response = HttpResponse(self.data) 
-            self.analyze_result = self.analyzer.do_analyze(self.response)
+
+            #TODO
+            #self.analyze_result = self.analyzer.do_analyze(self.response)

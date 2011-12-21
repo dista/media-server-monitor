@@ -28,7 +28,7 @@ class HttpClient(asyncore.dispatcher):
             self.socket_error = True
             print >> sys.stderr, "[ERROR][handle_close] %s" % s
 
-        self.on_done()
+        self.on_done(self.socket_error)
 
     def handle_read(self):
         try:
