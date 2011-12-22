@@ -20,6 +20,5 @@ class MediaServerAdminQueryer(HttpClient):
 
         if not has_error:
             self.response = HttpResponse(self.data) 
-
-            #TODO
-            #self.analyze_result = self.analyzer.do_analyze(self.response)
+            self.analyze_result = self.analyzer.do_analyze(self.response)
+            self.analyze_result['sample']['mms_stream_id'] = self.stream_id
