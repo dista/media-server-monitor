@@ -1,0 +1,34 @@
+$def with(web, samples)
+<!doctype html>
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <title>TVie 媒体服务器监控</title>
+        <link href="http://$web.ctx.env['HTTP_HOST']/mms/ui/static/css/reset-min.css" rel="stylesheet" type="text/css">
+        <link href="http://$web.ctx.env['HTTP_HOST']/mms/ui/static/css/ui.css" rel="stylesheet" type="text/css">
+        <script src="http://$web.ctx.env['HTTP_HOST']/mms/ui/static/js/jquery-1.7.1.min.js"></script>
+        <script src="http://$web.ctx.env['HTTP_HOST']/mms/ui/static/js/ui.js"></script>
+        <script>
+            UI = {"samples_interface": "http://$web.ctx.env['HTTP_HOST']/mms/ui/samples"};
+        </script>
+    </head>
+    <body id='home'>
+        <div class='wrapper'>
+            <div id='head'>
+                <div id='sample_ajax_status' class='left' style='display: none;'></div>
+                <div class='right' id='refresh_container'>
+                        <span>每</span><span id='refresh_time'></span><span style='margin-right: 10px;'>秒刷新一次</span>
+                        <button name='toggle_refresh' id='toggle_refresh'>停止</button><span>自动刷新</span>
+                </div>
+                <div id='notify' style='display: none;'>已获取最新数据</div>
+                <div class='clear'></div>
+            </div>
+            <div id='stream_list'>
+                $:samples
+            </div>
+        </div>
+        <div style='border-top: solid 1px #bbb'>
+            TVie &copy 2011
+        </div>
+    </body>
+<html>

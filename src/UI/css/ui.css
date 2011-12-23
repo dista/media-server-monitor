@@ -1,0 +1,145 @@
+html
+{
+}
+
+.wrapper
+{
+    width: 960px;
+    margin: 0 auto;
+    border: solid 1px #bbb;
+    border-top: none;
+    font-family: arial;
+    font-size: 14px;
+}
+
+#home #head
+{
+    border-bottom: solid 1px #bbb;
+    position: relative;
+    background-color: #555;
+    color: white;
+    padding-top: 10px;
+}
+
+#home #sample_ajax_status
+{
+    width: 16px;
+    height: 16px;
+    margin-left: 4px;
+    background-image: url("images/loader.gif");
+}
+
+#home .loading
+{
+
+}
+
+#home #toggle_refresh
+{
+}
+
+.right
+{
+    float: right
+}
+
+.left
+{
+    float: left
+}
+
+.clear
+{
+    clear: both
+}
+
+.status_icon
+{
+    width: 16px;
+    height: 16px;
+    background-color: green;
+}
+
+.status_icon
+{
+    float: left;
+    margin-right: 4px;
+}
+
+#stream_list table
+{
+    width: 100%;
+}
+
+#stream_list tr.simple
+{
+    border-top: solid 1px #bbb;
+}
+
+.status_container
+{
+    width: 20px;
+    padding-left: 2px;
+}
+
+.stream_name
+{
+    padding-left: 10px;
+}
+
+.unify_name
+{
+    font-weight: bold;
+}
+
+.sample_interface
+{
+    color: #888;
+}
+
+.upstream_rate
+{
+    margin-left: 4px;
+}
+
+.detail
+{
+    font-size: 12px;
+    background-color: #f3f3f3;
+}
+
+.detail td > div
+{
+    margin: 2px auto;
+}
+
+.simple
+{
+    background-color: #eee;
+    border-bottom: dotted 1px #bbb;
+}
+
+.detail_title
+{
+    width: 100px;
+}
+
+.sample_time
+{
+    color: #888;
+    width: 180px;
+    font-size: 12px;
+}
+
+.margin-left-4
+{
+    margin-left: 4px;
+}
+
+#notify
+{
+    position: absolute;
+    left: 440px;
+    background-color: #7a8;
+    padding: 4px;
+}
