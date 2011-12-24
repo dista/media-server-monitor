@@ -14,7 +14,12 @@ class LogLevel:
     ERROR    = 2
     WARN     = 4
     ALL      = 7
+    
+_log = None
 
+def get_logger():
+    return _log
+    
 class Logger:
     line_sep_chars = "\n"
 
@@ -31,12 +36,14 @@ class Logger:
         
         if log_path == None:
             self.log_fd = sys.stderr
+            _log = self
             return
             
         self.log_fd = None
         try:
             # if the log file is not exits, it will be created
             self.log_fd = open(log_path, 'a+')
+            _log = self
         except IOError, e:
             raise LogError(e)
     
@@ -76,3 +83,4 @@ class Logger:
     def error(self, msg):
         if self.level & LogLevel.ERROR:
             self.log("[error] %s" % msg)
+            
