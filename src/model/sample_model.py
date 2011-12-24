@@ -4,8 +4,8 @@ Created on 2011-12-17
 @author: dista
 '''
 class SampleModel:
-    def __init__(self, db):
-        self.db
+    def __init__(self):
+        pass
         
     def add(self, stream):
         pass

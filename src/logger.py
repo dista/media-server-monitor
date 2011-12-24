@@ -3,7 +3,7 @@ Created on 2011-12-17
 
 @author: dista
 '''
-from exception import *
+from exception import LogError
 
 import time, sys
 import threading

@@ -4,7 +4,6 @@ Created on 2011-12-18
 @author: dista
 '''
 import asyncore, socket
-from exception import URIError
 from common.uri import Uri
 import sys
 
@@ -26,7 +25,7 @@ class HttpClient(asyncore.dispatcher):
             self.close()
         except Exception, e:
             self.socket_error = True
-            print >> sys.stderr, "[ERROR][handle_close] %s" % s
+            print >> sys.stderr, "[ERROR][handle_close] %s" % e
 
         self.on_done(self.socket_error)
 

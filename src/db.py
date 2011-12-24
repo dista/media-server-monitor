@@ -44,10 +44,16 @@ class DbConnection(connections.Connection):
     def close(self):
         pass
     
+pool = None
+
+def get_pool():
+    return pool
+    
 class DbPool:
     '''
     Python Mysqldb is not thread safe, we must make sure that
-    threads won't share DbConnection
+    threads won't share DbConnection.
+    do not call this twice, use get_pool to get pool after created
     '''
     def __init__(self, max_db, host, port, name, password, db_name, logger):
         self.host = host
@@ -65,6 +71,7 @@ class DbPool:
         self.lock = threading.Lock()
         self.top_pools_lock = threading.Lock()
         self.event_queue_lock = threading.Lock()
+        pool = self
     
     def get_one(self):
         self.logger.debug("%s AC lock" % threading.current_thread())

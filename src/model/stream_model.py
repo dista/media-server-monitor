@@ -5,8 +5,8 @@ Created on 2011-12-17
 '''
 
 class StreamModel:
-    def __init__(self, db):
-        self.db
+    def __init__(self):
+        pass
         
     def add(self, stream):
         pass

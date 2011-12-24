@@ -9,11 +9,11 @@ import asyncore
 from media_server_admin_queryer import MediaServerAdminQueryer
 from analyzer import Analyzer
 import time
+import logger
 
 class AnalyzeThread(threading.Thread):
-    def __init__(self, db_pool, logger, sleep_time):
-        self.db_pool = db_pool
-        self.logger = logger
+    def __init__(self, sleep_time):
+        self.logger = logger.get_logger()
         self.obs = None
         self.sleep_time = sleep_time
         self.analyzer = Analyzer()

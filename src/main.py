@@ -7,7 +7,7 @@ Created on 2011-12-17
 from config_reader import ConfigReader
 from stream_monitor_thread import StreamMonitorThread
 from analyzer.analyze_thread import AnalyzeThread
-from db import Database
+from db import DbPool
 from logger import Logger
 
 CONFIG_PATH = "/usr/local/tvie/config/media-server-monitor.conf"
@@ -23,11 +23,14 @@ def main():
     
     config = cr.read_config_as_dict(CONFIG_PATH)
     
-    logger = Logger(config.logger.path, config.logger.level)
-    database = Database(config.db.host, config.db.port, config.db.name, config.db.password, logger)
+    # create the log, so other module can use it
+    Logger(config.logger.path, config.logger.level)
     
-    az_t = AnalyzeThread(database, logger)
-    smt = StreamMonitorThread(config.get_stream_api_url, az_t, database, logger)
+    # create the pool, so other module can use it
+    DbPool(config.db.host, config.db.port, config.db.name, config.db.password)
+    
+    az_t = AnalyzeThread()
+    smt = StreamMonitorThread(config.get_stream_api_url, az_t)
     
     all_threads["analyze_thread"] = az_t
     all_threads["stream_monitor"] = smt 

@@ -15,7 +15,7 @@ class Analyzer:
         ret = {"score": 0, "sample": None}
 
         if http_response.header['code'] != 200:
-            ret['sample'] = self._build_failed_sample(http_response.header['code_des'])
+            ret['sample'] = self._build_failed_sample(sample_time, http_response.header['code_des'])
             return ret
 
         ret['sample'] = parser.parse_ms_monitor_result(http_response.body)
@@ -28,7 +28,7 @@ class Analyzer:
         ret['is_failed'] = False
         return ret
 
-    def _build_failed_sample(self, http_code_des):
+    def _build_failed_sample(self, sample_time, http_code_des):
         return {
                 'is_failed': True,
                 'failed_reason': http_code_des,
@@ -82,10 +82,9 @@ class Analyzer:
         score_detail['downstream_value'] = 100
 
         #TODO: live_delay
-        score_detail['live_delay_value'] = 100
+        score_detail['live_delay_value'] = int((10000 - current_sample["live_delay_ms"]) / float(10000) * 100)
 
-        #score = 0.4 * score_detail['upstream_value'] + 0.3 * score_detail['downstream_value'] + 0.3 * score_detail['live_delay_value']
-        score = score_detail['upstream_value']
+        score = 0.8 * score_detail['upstream_value'] + 0.0 * score_detail['downstream_value'] + 0.2 * score_detail['live_delay_value']
 
         return (int(score), score_detail)
 
