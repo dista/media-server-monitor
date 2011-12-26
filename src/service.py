@@ -4,12 +4,13 @@ Created on 2011-12-18
 @author: dista
 '''
 
-import api
+import api.index
 import UI.index
 import web
 
 urls = (
-        "/mms/ui", UI.index.app
+        "/mms/ui", UI.index.app,
+        "/mms/api", api.index.app
         )
 
 

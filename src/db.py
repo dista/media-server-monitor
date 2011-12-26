@@ -7,14 +7,15 @@ Created on 2011-12-17
 import threading
 import MySQLdb
 import traceback
+import logger
 from MySQLdb import connections
 
 class DbConnection(connections.Connection):
     timeout = 60
     
-    def __init__(self, id, host, port, name, password, db_name, logger = None):
+    def __init__(self, id, host, port, name, password, db_name):
         self.id = id
-        self.logger = logger
+        self.logger = logger.get_logger()
         self._is_used = False
         
         connections.Connection.__init__(self, host = host, user = name, passwd = password, db = db_name, port = port, connect_timeout = DbConnection.timeout, \
@@ -55,7 +56,7 @@ class DbPool:
     threads won't share DbConnection.
     do not call this twice, use get_pool to get pool after created
     '''
-    def __init__(self, max_db, host, port, name, password, db_name, logger):
+    def __init__(self, max_db, host, port, name, password, db_name):
         self.host = host
         self.port = port
         self.name = name

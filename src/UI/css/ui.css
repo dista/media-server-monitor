@@ -1,24 +1,34 @@
 html
 {
+    background-color: #d6d8d8;
 }
 
 .wrapper
 {
     width: 960px;
     margin: 0 auto;
-    border: solid 1px #bbb;
     border-top: none;
     font-family: arial;
     font-size: 14px;
+    padding: 10px;
+    background-color: white;
+    position: relative;
+    top: 30px;
+    -webkit-box-shadow: 2px 2px 1px #999;
+    box-shadow: 2px 2px 1px #999;
+    -moz-box-shadow: 2px 2px 1px #999;
 }
 
 #home #head
 {
     border-bottom: solid 1px #bbb;
-    position: relative;
-    background-color: #555;
+    position: fixed;
+    background-color: black;
     color: white;
-    padding-top: 10px;
+    margin: 0 auto;
+    width: 100%;
+    height: 30px;
+    z-index: 2;
 }
 
 #home #sample_ajax_status
@@ -71,11 +81,6 @@ html
     width: 100%;
 }
 
-#stream_list tr.simple
-{
-    border-top: solid 1px #bbb;
-}
-
 .status_container
 {
     width: 20px;
@@ -105,18 +110,23 @@ html
 .detail
 {
     font-size: 12px;
-    background-color: #f3f3f3;
+}
+
+.detail td
+{
+    padding-bottom: 30px;
 }
 
 .detail td > div
 {
-    margin: 2px auto;
+    margin: 4px auto;
 }
 
 .simple
 {
-    background-color: #eee;
-    border-bottom: dotted 1px #bbb;
+    background-color: #fefefe;
+    border-bottom: solid 1px #999;
+    border-top: solid 2px #999;
 }
 
 .detail_title
@@ -138,8 +148,17 @@ html
 
 #notify
 {
-    position: absolute;
-    left: 440px;
+    position: fixed;
+    left: 50%;
+    margin-left: -80px;
     background-color: #7a8;
     padding: 4px;
+}
+
+#copyright
+{
+    position: fixed;
+    left: 0px;
+    bottom: 0px;
+    color: #555;
 }

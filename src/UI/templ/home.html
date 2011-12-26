@@ -13,21 +13,21 @@ $def with(web, samples)
         </script>
     </head>
     <body id='home'>
-        <div class='wrapper'>
-            <div id='head'>
-                <div id='sample_ajax_status' class='left' style='display: none;'></div>
-                <div class='right' id='refresh_container'>
-                        <span>每</span><span id='refresh_time'></span><span style='margin-right: 10px;'>秒刷新一次</span>
-                        <button name='toggle_refresh' id='toggle_refresh'>停止</button><span>自动刷新</span>
-                </div>
-                <div id='notify' style='display: none;'>已获取最新数据</div>
-                <div class='clear'></div>
+        <div id='head'>
+            <div id='sample_ajax_status' class='left' style='display: none;'></div>
+            <div class='right' id='refresh_container'>
+                    <span>每</span><span id='refresh_time'></span><span style='margin-right: 10px;'>秒刷新一次</span>
+                    <button name='toggle_refresh' id='toggle_refresh'>停止</button><span>自动刷新</span>
             </div>
+            <div id='notify' style='display: none;'>已获取最新数据</div>
+            <div class='clear'></div>
+        </div>
+        <div class='wrapper'>
             <div id='stream_list'>
                 $:samples
             </div>
         </div>
-        <div style='border-top: solid 1px #bbb'>
+        <div id='copyright'>
             TVie &copy 2011
         </div>
     </body>

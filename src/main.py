@@ -9,8 +9,7 @@ from stream_monitor_thread import StreamMonitorThread
 from analyzer.analyze_thread import AnalyzeThread
 from db import DbPool
 from logger import Logger
-
-CONFIG_PATH = "/usr/local/tvie/config/media-server-monitor.conf"
+import conf
 
 all_threads = {"analyze": None, "stream_monitor": None}
 
@@ -21,13 +20,13 @@ def terminate_program():
 def main():
     cr = ConfigReader()
     
-    config = cr.read_config_as_dict(CONFIG_PATH)
+    config = cr.read_config_as_dict(conf.CONFIG_PATH)
     
     # create the log, so other module can use it
     Logger(config.logger.path, config.logger.level)
     
     # create the pool, so other module can use it
-    DbPool(config.db.host, config.db.port, config.db.name, config.db.password)
+    DbPool(4, config.db.host, config.db.port, config.db.name, config.db.password)
     
     az_t = AnalyzeThread()
     smt = StreamMonitorThread(config.get_stream_api_url, az_t)
