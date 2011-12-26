@@ -107,7 +107,7 @@ class StreamModel:
             dic_obj = {}
             for obj in result:
                 dic_obj[obj] = str(result[obj])
-            dic_objs[str(result['id'])] = dic_objlues in mms_stream failed.'
+            dic_objs[str(result['id'])] = dic_objlues in mms_stream failed.
             print 'MySQLdb Error %d : %s\n' % (err.args[0], args[1])
 
         return
@@ -166,9 +166,10 @@ class StreamModel:
             print 'Query result is empty\n'
             return
 
-        for result in result
-        s:
+        for result in results:
             dic_obj = {}
             for obj in result:
                 dic_obj[obj] = str(result[obj])
             dic_objs[str(result['id'])] = dic_obj
+
+	return json.dumps(dict_objs)
