@@ -8,19 +8,18 @@ import sys
 import urllib
 import urllib2
 import json
+import config_reader
+from exception import InvalidApiData, ApiCallError
 
 from urllib2 import URLError, HTTPError
 
 class ApiServerModel:
-    def __init__(self, get_stream_api_url):
+    def __init__(self, get_stream_api_url, read_token, monitor_cdn_in_api):
         self.get_stream_api_url = get_stream_api_url
-        self.readtoke = '12345679'
+        self.readtoken = read_token
+        self.monitor_cdn_in_api = monitor_cdn_in_api
         
-def get(self):
-
-        if self.get_stream_api_url == None:
-            return None
-
+    def get(self):
         data = """   <find>
                         <user_key>%s</user_key>
                         <action>find_all_channels</action>
@@ -39,40 +38,36 @@ def get(self):
             response = urllib2.urlopen(request)
             temp = response.read()
         except URLError as err:
-            print 'URL Error happend while sendsended_requestsing request'
-            print 'Error %d : %s' % (err.args[0], err.args[1])
-            return None
+            raise ApiCallError(err)
 
         try:            
             all_info = json.loads(temp)
         except ValueError as err:
-            print 'Value Error happend while loads all_info'
-            print 'Error %d : %s' % (err.args[0], err.args[1])
-            return None
+            raise InvalidApiData("API returns: %s" % temp)
 
-        streams = self.get_streams_info(all_info)
+        streams = self._get_streams_info(all_info)
 
         return streams
 
-def get_streams_info(self,all_info):
+    def _get_streams_info(self,all_info):
         stream_id = 0
-        streams = {}
-        streams_result = {}
-
-        if all_info == None:
-            print 'empty infomation'
-            return
+        streams_result = []
 
         channels = all_info['channels'];
-        if channels == None:
-            print 'empty channels information'
 
         for channel in channels:
+            server = channel['server'][0]
             streams = channel['streams']
             for stream in streams:
-                stream_id = stream['id']
-            streams_result[str(stream_id)] = stream
+                streams_result.append({"stream_id": stream['id'], 
+                                      "unify_name": self._build_unify_name(server, channel, stream),
+                                      "sample_interface": self._build_sample_interface(server, channel, stream)})
+         
+         return streams_result
 
-        print streams_result
 
-        return json.dumps(streams_result)
+    def _build_unify_name(self, server, channel, stream, is_cdn):
+        return "%s/%s/%s/%s" % (server.name, channel.customer_name, channel.display_name, stream.name)
+
+    def _build_sample_interface(self, server, channel, stream, interface, is_cdn):
+        return "http://"

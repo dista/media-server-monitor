@@ -9,3 +9,9 @@ class LogError(Exception):
 
 class URIError(Exception):
     pass
+
+class InvalidApiData(Exception):
+    pass
+
+class ApiCallError(Exception):
+    pass
