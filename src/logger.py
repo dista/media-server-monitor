@@ -36,14 +36,14 @@ class Logger:
         
         if log_path == None:
             self.log_fd = sys.stderr
-            _log = self
+            setattr(sys.modules[__name__], "_log", self)
             return
             
         self.log_fd = None
         try:
             # if the log file is not exits, it will be created
             self.log_fd = open(log_path, 'a+')
-            _log = self
+            setattr(sys.modules[__name__], "_log", self)
         except IOError, e:
             raise LogError(e)
     

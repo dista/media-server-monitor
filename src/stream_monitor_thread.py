@@ -7,15 +7,18 @@ import threading
 import time
 
 import logger
+import copy
 from model.stream_model import StreamModel
 from model.api_server_model import ApiServerModel
 
 class StreamMonitorThread(threading.Thread):
-    def __init__(self, get_stream_api_url, analyze_thread):
-        self.api_server_model = ApiServerModel(get_stream_api_url)
+    def __init__(self, get_stream_api_url, read_token, monitor_cdn_in_api, analyze_thread, extra_streams):
+        self.api_server_model = ApiServerModel(get_stream_api_url, read_token, monitor_cdn_in_api)
         self.analyze_thread = analyze_thread
         self.stream_db = StreamModel()
         self.logger = logger.get_logger()
+        self.extra_streams = extra_streams
+        self.api_return_streams = None
         
     def run(self):
         while True:
@@ -24,25 +27,43 @@ class StreamMonitorThread(threading.Thread):
             if not streams:
                 self.logger.warn("StreamMonitorThread: fail to get streams, exit the thread")
                 return
+
+            current_streams_ids = [stream['id'] for stream in streams]
+
+            original_streams_ids = []
+            if self.api_return_streams != None:
+                original_streams_ids = [stream['id'] for stream in self.api_return_streams]
+
+            need_update = len(set(current_streams_ids) - set(original_streams_ids)) != 0:
             
-            if not self.update_db_and_notify(streams):
-                self.logger.warn("StreamMonitorThread: fail to update db and notify, exit the thread")
-                return
+            if need_update:
+                self.api_return_streams = streams
+                new_obs = copy.copy(self.api_return_streams).extend(extra_streams)
+                self.analyze_thread.notify_obs_changed(new_obs)
             
-    def update_db_and_notify(self, streams):
-        pass
-                
     def get_streams(self):
         sleep_time = 2
+        streams = None
         
-        streams = self.api_server_model.get()
-        
-        while not streams:
+        while True:
+            streams = None
+
+            try:
+                streams = self.api_server_model.get()
+            except ApiCallError, e:
+                self.logger.debug("api request failed with %s" % e)
+            except InvalidApiData, e:
+                self.logger.debug("api request failed with %s" % e)
+                return None
+
+            if streams != None:
+                break
+
             self.logger.warn("StreamMonitorThread: fail to get streams, wait for %d seconds to retry" % sleep_time)
             if sleep_time >= 3 * 60:
                 return None
+
             time.sleep(sleep_time)
             sleep_time = sleep_time ** 2
-            streams = self.api_server_model.get()
             
         return streams

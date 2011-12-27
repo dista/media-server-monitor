@@ -5,171 +5,42 @@ Created on 2011-12-17
 '''
 
 import json
+import db
 import MySQLdb
+from model import helper
 
 class StreamModel:
-    def __init__(self, db):
-        self.db = db
-        self.cursor = None
+    def __init__(self):
+        self.model_name = "mms_stream"
 
-    def getCursor(self):
-        try:
-            self.cursor = self.db.cursor(MySQLdb.cursors.DictCursor)
-        except MySQLdb.Error, err:
-            print 'MySQLdb Error %d : %s.\n' % (err.args[0], err.args[1])
-            self.db.close()
+    def get_by_stream_ids(self, stream_ids):
+        if stream_ids == None or len(stream_ids) == 0:
+            return []
 
+        return db.excute("SELECT * FROM %s WHERE stream_id in (%s)" % (self.model_name, ", ".join(stream_ids)))
 
-    def add(self, strui_errorseams):
-        add_value = ''
-        value = ''
+    def delete_by_ids(self, ids):
+        if ids == None || len(ids) == 0:
+            return True
 
-        if streams == None:
-            print 'Empty stream information.\n'
-            return
+        db.excute("DELETE FROM %s WHERE mms_stream_id in (%s)" % (self.model_name, ", ".joins(ids))
 
-        for stream in streams:
-            if streams['id'] != None \
-                and streams['interface'] != None:
-                add_value = add_value + '(%d, %s),' % (stream['id'], stream['sample_interface'])
+    def update_by_stream_id(self, stream):
+        set_state = "SET "
+        for key in stream.keys():
+            if key == 'stream_id':
+                continue
+            val = stream[key] 
+            if any([isinstance(stream[key], cls) for cls in [str, unicode]]):
+                set_state += "%s='%s, ' " % (key, val)
+            else
+                set_state += "%s=%s, " %(key, val)
 
-        value = add_value.rstrip(',') + ';'
-        sql = 'INSERT INTO mms_stream \
-                (stream_id, sample_interface) \
-                VALUES %s' % (value)
+        set_state.rstrip(', ')
 
-        try:
-            self.cursor.execute(sql)
-        except MySQLdb.Error, err:
-            print 'Add values into mms_stream failed.'
-            print 'MySQLdbui_errors Error %d : %s\n' % (err.args[0], args[1])
+        db.excute("UPDATE %s %s where stream_id=%d" % (self.model_name, set_state, stream['stream_id']))
 
-        return
+    def add(self, streams):
+        insert_value = helper.build_insert_values(streams)
 
-    
-    def update(self, streams):
-        update_value = ''
-        value = ''
-
-        if streams == None:
-            print 'Empty stream information.\n'
-            return
-
-        for stream in streams:
-            if streams['id'] != None \
-                and streams['interface'] != None:
-                update_value = update_value + '(%d, %s),' % (stream['id'], stream['sample_interface'])
-
-        value = update_value.rstrip(',') + ';'
-        sql = 'UPDATE mms_stream \
-                (stream_id, sample_interface) \
-                VALUES %s' % (value)
-
-        try:
-            self.cursor.execute(sql)
-        except MySQLdb.Error, err:
-            print 'UPDATE values in mms_stream failed.'
-            print 'MySQLdb Error %d : %s\n' % (err.args[0], args[1])
-
-        return
-
-    
-    def delete(self, streams):
-        delete_value = ''
-        value = ''
-
-        if streams == None:
-            print 'Empty stream information.\n'
-            return
-
-        for stream in streams:
-            if streams['id'] != None \
-                and streams['interface'] != None:
-                delete_value = delete_value + '(stream=%d, sample_interface="%s"), OR' \
-                % (stream['id'], stream['sample_interface'])
-
-        value = delete_value.rstrip(', OR') + ';'
-        sql = 'DELETE FROM mms_stream\
-                WHERE stream_id=%d \
-                AND sample_interface="%s";' % (value)
-
-        try:
-            self.cousor.execute(sql)
-        except MySQLdb.Error err:
-            print 'DELETE values in mms_stream failed.'
-        dict_objs = {}
-
-        if query_result == None:
-           print 'Query result is empty\n'
-           return
-
-        for result in results:
-            dic_obj = {}
-            for obj in result:
-                dic_obj[obj] = str(result[obj])
-            dic_objs[str(result['id'])] = dic_objlues in mms_stream failed.
-            print 'MySQLdb Error %d : %s\n' % (err.args[0], args[1])
-
-        return
-
-    
-    def get(self):
-        streams = None
-        dict_stream = None
-            
-        sql = 'SELECT * FROM mms_stream;'
-
-        try:
-            self.cursor.execute(sql)
-            stream = self.cursor.fetchall()
-        except MySQLdb.Error, err:
-            print 'GET data from mms_stream failed.'
-            print 'MySQLdb Error %d : %s\n' % (err.args[0], args[1])
-        return
-
-        if len(stream) == 0:
-            print 'Empty set\n'
-            return None
-        else:
-            dict_stream = self.result_to_dict(streams)
-
-        return json.dumps(dict_stream)
-
-    
-    def get_by_id(self, stream_id);
-        streams = Nonesended_requests
-        dict_stream = None
-            
-        sql = 'SELECT * FROM mms_stream\
-                WHERE id="%d";' % (stream_id)
-
-        try:
-            self.cursor.execute(sql)
-            stream = self.cursor.fetchall()
-        except MySQLdb.Error, err:
-            print 'Get stream from database failed.\n'
-            print 'MySQLdb Error %d : %s\n' % (err.args[0], args[1])
-        return
-
-        if len(stream) == 0:
-            print 'Empty set\n'
-            return None
-        else:
-            dict_stream = self.result_to_dict(streams)
-
-        return json.dumps(dict_stream)
-
-    def result_to_dict(self, results):
-        dict_objs = {}
-
-        if query_result == None:
-            print 'Query result is empty\n'
-            return
-
-        for result in results:
-            dic_obj = {}
-            for obj in result:
-                dic_obj[obj] = str(result[obj])
-            dic_objs[str(result['id'])] = dic_obj
-
-	return json.dumps(dict_objs)
+        db.excute("INSERT INTO %s %s" % (self.model_name, insert_value))

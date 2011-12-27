@@ -8,6 +8,7 @@ import threading
 import MySQLdb
 import traceback
 import logger
+import sys
 from MySQLdb import connections
 
 class DbConnection(connections.Connection):
@@ -42,8 +43,33 @@ class DbConnection(connections.Connection):
     def set_used_status(self, is_used):
         self._is_used = is_used
         
-    def close(self):
-        pass
+    def close_ex(self):
+        if hasattr(self, 'close'):
+            self.close()
+
+def execute(query_str, args = None):
+    log = logger.get_logger()
+    pool = get_pool()
+
+    connection = pool.get_one()
+    cursor = None
+
+    try:
+        cursor = connection.cursor(MySQLdb.cursors.DictCursor)
+
+        cursor.execute(query_str, args)
+        return cursor.fetchall()
+
+    except MySQLdb.Error, e:        
+        log.debug(str(e))
+        if str(e).find("connection"):
+            connection.set_alive(False)
+        else:
+            raise e
+    finally:
+        if cursor != None:
+            cursor.close()
+        pool.release(connection)
     
 pool = None
 
@@ -62,7 +88,7 @@ class DbPool:
         self.name = name
         self.db_name = db_name
         self.password = password
-        self.logger = logger
+        self.logger = logger.get_logger()
         self.max_db = max_db
         self.top_pools = []
         self.event_queue = [] 
@@ -72,7 +98,7 @@ class DbPool:
         self.lock = threading.Lock()
         self.top_pools_lock = threading.Lock()
         self.event_queue_lock = threading.Lock()
-        pool = self
+        setattr(sys.modules[__name__], "pool", self)
     
     def get_one(self):
         self.logger.debug("%s AC lock" % threading.current_thread())
@@ -140,7 +166,7 @@ class DbPool:
             
             ret = None
             try:
-                ret = DbConnection(con_id, self.host, self.port, self.name, self.password, self.db_name, self.logger)
+                ret = DbConnection(con_id, self.host, self.port, self.name, self.password, self.db_name)
                 self.current_dbc_number += 1
                 self.pools.append(ret)
                 ret.set_used_status(True)
@@ -222,6 +248,7 @@ class DbPool:
             pool.remove(con)
             self.current_dbc_number -= 1
             try:
-                con.close()
+                con.close_ex()
             except Exception:
                 pass           
+

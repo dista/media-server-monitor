@@ -22,3 +22,9 @@ class MediaServerAdminQueryer(HttpClient):
             self.response = HttpResponse(self.data) 
             self.analyze_result = self.analyzer.do_analyze(self.response)
             self.analyze_result['sample']['mms_stream_id'] = self.stream_id
+        else:
+            self.analyze_result = {
+                                  "score": 0,
+                                  "is_failed": True
+                                  }
+            self.analyze_result['sample'], self.analyze_result['score_detail'], self.analyze_result['score_level'], self.analyze_result['cal_data'] = self.analyzer.get_failed_data(self.sample_time, "socket error")
