@@ -50,7 +50,6 @@ class ApiServerModel:
         return streams
 
     def _get_streams_info(self,all_info):
-        stream_id = 0
         streams_result = []
 
         channels = all_info['channels'];
@@ -59,11 +58,12 @@ class ApiServerModel:
             server = channel['server'][0]
             streams = channel['streams']
             for stream in streams:
-                streams_result.append({"stream_id": stream['id'], 
+                streams_result.append({"stream_id": stream['id'],                                     
                                       "unify_name": self._build_unify_name(server, channel, stream),
-                                      "sample_interface": self._build_sample_interface(server, channel, stream)})
+                                      "sample_interface": self._build_sample_interface(server, channel, stream)
+                                      })
          
-         return streams_result
+        return streams_result
 
 
     def _build_unify_name(self, server, channel, stream, is_cdn):

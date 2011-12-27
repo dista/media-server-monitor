@@ -10,6 +10,7 @@ import logger
 import copy
 from model.stream_model import StreamModel
 from model.api_server_model import ApiServerModel
+from excepton import ApiCallError, InvalidApiData
 
 class StreamMonitorThread(threading.Thread):
     def __init__(self, get_stream_api_url, read_token, monitor_cdn_in_api, analyze_thread, extra_streams):
@@ -25,7 +26,7 @@ class StreamMonitorThread(threading.Thread):
             streams = self.get_streams()
             
             if not streams:
-                self.logger.warn("StreamMonitorThread: fail to get streams, exit the thread")
+                self.logger.error("StreamMonitorThread: fail to get streams, exit the thread")
                 return
 
             current_streams_ids = [stream['id'] for stream in streams]
@@ -34,11 +35,11 @@ class StreamMonitorThread(threading.Thread):
             if self.api_return_streams != None:
                 original_streams_ids = [stream['id'] for stream in self.api_return_streams]
 
-            need_update = len(set(current_streams_ids) - set(original_streams_ids)) != 0:
+            need_update = len(set(current_streams_ids) - set(original_streams_ids)) != 0
             
             if need_update:
                 self.api_return_streams = streams
-                new_obs = copy.copy(self.api_return_streams).extend(extra_streams)
+                new_obs = copy.copy(self.api_return_streams).extend(self.extra_streams)
                 self.analyze_thread.notify_obs_changed(new_obs)
             
     def get_streams(self):

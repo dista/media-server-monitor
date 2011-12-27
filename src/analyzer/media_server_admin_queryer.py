@@ -6,6 +6,8 @@ Created on 2011-12-17
 from http_client import HttpClient
 from common.http import HttpResponse
 from datetime import datetime
+from model.stream_model import StreamModel
+from model.sample_model import SampleModel
 
 class MediaServerAdminQueryer(HttpClient):
     def __init__(self, analyzer, stream_id, admin_if_addr, _map):
@@ -20,11 +22,17 @@ class MediaServerAdminQueryer(HttpClient):
 
         if not has_error:
             self.response = HttpResponse(self.data) 
-            self.analyze_result = self.analyzer.do_analyze(self.response)
-            self.analyze_result['sample']['mms_stream_id'] = self.stream_id
+            self.analyze_result = self.analyzer.do_analyze(self.sample_time, self.response, self._get_exist_samples())
         else:
             self.analyze_result = {
                                   "score": 0,
                                   "is_failed": True
                                   }
             self.analyze_result['sample'], self.analyze_result['score_detail'], self.analyze_result['score_level'], self.analyze_result['cal_data'] = self.analyzer.get_failed_data(self.sample_time, "socket error")
+        self.analyze_result['sample']['mms_stream_id'] = self.stream_id
+
+    def _get_exist_samples(self):
+        sm = StreamModel()
+        
+        #TODO
+        stream = sm.get_by_stream_id()

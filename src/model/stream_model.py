@@ -17,13 +17,16 @@ class StreamModel:
         if stream_ids == None or len(stream_ids) == 0:
             return []
 
-        return db.excute("SELECT * FROM %s WHERE stream_id in (%s)" % (self.model_name, ", ".join(stream_ids)))
+        return db.execute("SELECT * FROM %s WHERE stream_id in (%s)" % (self.model_name, ", ".join(stream_ids)))
+    
+    def get_by_stream_id(self, stream_id):
+        return db.execute("SELECT * FROM %s WHERE stream_id == %d" % (self.model_name, stream_id))
 
     def delete_by_ids(self, ids):
-        if ids == None || len(ids) == 0:
+        if ids == None or len(ids) == 0:
             return True
 
-        db.excute("DELETE FROM %s WHERE mms_stream_id in (%s)" % (self.model_name, ", ".joins(ids))
+        db.execute("DELETE FROM %s WHERE mms_stream_id in (%s)" % (self.model_name, ", ".joins(ids)))
 
     def update_by_stream_id(self, stream):
         set_state = "SET "
@@ -33,14 +36,14 @@ class StreamModel:
             val = stream[key] 
             if any([isinstance(stream[key], cls) for cls in [str, unicode]]):
                 set_state += "%s='%s, ' " % (key, val)
-            else
+            else:
                 set_state += "%s=%s, " %(key, val)
 
         set_state.rstrip(', ')
 
-        db.excute("UPDATE %s %s where stream_id=%d" % (self.model_name, set_state, stream['stream_id']))
+        db.execute("UPDATE %s %s where stream_id=%d" % (self.model_name, set_state, stream['stream_id']))
 
     def add(self, streams):
         insert_value = helper.build_insert_values(streams)
 
-        db.excute("INSERT INTO %s %s" % (self.model_name, insert_value))
+        db.execute("INSERT INTO %s %s" % (self.model_name, insert_value))

@@ -39,6 +39,8 @@ class Analyzer:
                 "average_upstream_kbps_10": self._get_current_upstream_kbps(samples, 4),
                 "average_upstream_kbps_100": self._get_current_upstream_kbps(samples, 34)
               }
+        
+        return ret
 
     def get_failed_data(self, sample_time, failed_reason):
         return self._build_failed_data(sample_time, failed_reason)
@@ -88,14 +90,14 @@ class Analyzer:
                 },
                 # cal data
                 {
-                    "average_downstream_kbps_3": self._get_current_downstream_kbps(samples, 2),
-                    "average_downstream_kbps_10": self._get_current_downstream_kbps(samples, 4),
-                    "average_downstream_kbps_100": self._get_current_downstream_kbps(samples, 34),
-                    "average_upstream_kbps_3": self._get_current_upstream_kbps(samples, 2),
-                    "average_upstream_kbps_10": self._get_current_upstream_kbps(samples, 4),
-                    "average_upstream_kbps_100": self._get_current_upstream_kbps(samples, 34)
+                    "average_downstream_kbps_3": 0,
+                    "average_downstream_kbps_10": 0,
+                    "average_downstream_kbps_100": 0,
+                    "average_upstream_kbps_3": 0,
+                    "average_upstream_kbps_10": 0,
+                    "average_upstream_kbps_100": 0
                 }
-              }
+              )
 
 
     def _cal_score(self, samples):
@@ -133,7 +135,7 @@ class Analyzer:
     def _get_current_upstream_kbps(self, samples, sample_use):
         return self._get_current_kbps(samples, True, sample_use)
 
-    def _get_current_downstream_kbps(selfm samples, sample_use):
+    def _get_current_downstream_kbps(self, samples, sample_use):
         return self._get_current_kbps(samples, False, sample_use)
 
     def _get_current_kbps(self, samples, is_upstream, sample_use):

@@ -48,6 +48,9 @@ class AnalyzeThread(threading.Thread):
                 sended_requests.append(MediaServerAdminQueryer(self.analyzer, stream['id'], stream['sample_interface'], _map)
 
             asyncore.loop(map = _map)
+            
+            delete_streams, update_streams, add_streams = self._get_changed_streams(all_streams, self._get_obs())
+            
             try:
                 self._update_db(delete_streams, update_streams, add_streams, sended_requests)
             except MySQLdb.Error, e:
@@ -86,16 +89,19 @@ class AnalyzeThread(threading.Thread):
         mms_streams = self.stream_model.get_by_stream_ids([stream['id'] for stream in delete_streams])
 
         mms_streams_ids = [stream['id'] for stream in mms_streams]
-        self.sample_model.delete_by_stream_ids(mms_stream_ids)
+        self.sample_model.delete_by_stream_ids(mms_streams_ids)
         self.stream_model.delete_by_ids(mms_streams_ids)
 
         for stream in update_streams:
             self.stream_model.update(stream)
 
-        self.stream_model.add(streams)
+        self.stream_model.add(add_streams)
 
         for request in sended_requests:
             analyze_result = request.analyze_result
             stream = analyze_result['cal_data']
             stream['stream_id'] = request.stream_id
-            stream['score'] = 
+            stream['score'] = analyze_result['score']
+            # TODO: other fields
+            
+            self.stream_model.update(stream)
