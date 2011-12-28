@@ -58,16 +58,31 @@ class ApiServerModel:
             server = channel['server'][0]
             streams = channel['streams']
             for stream in streams:
-                streams_result.append({"stream_id": stream['id'],                                     
+                streams_result.append({"stream_id": int(stream['id']),                                     
                                       "unify_name": self._build_unify_name(server, channel, stream),
                                       "sample_interface": self._build_sample_interface(server, channel, stream)
                                       })
+
+                if self.monitor_cdn_in_api and server['host_name']:
+                    streams_result.append({"stream_id": int(stream['id']) + 10000,                                     
+                                          "unify_name": self._build_unify_name(server, channel, stream),
+                                          "sample_interface": self._build_sample_interface(server, channel, stream)
+                                          })
+
          
         return streams_result
 
 
-    def _build_unify_name(self, server, channel, stream, is_cdn):
-        return "%s/%s/%s/%s" % (server.name, channel.customer_name, channel.display_name, stream.name)
+    def _build_unify_name(self, server, channel, stream, is_cdn = False):
+        host = server['ip_address']
+        if is_cdn:
+            host = server['host_name']
 
-    def _build_sample_interface(self, server, channel, stream, interface, is_cdn):
-        return "http://"
+        return "%s[%s]/%s/%s/%s" % (server['name'], host, channel['customer_name'], channel['display_name'], stream['name'])
+
+    def _build_sample_interface(self, server, channel, stream, is_cdn = False):
+        host = server['ip_address']
+        if is_cdn:
+            host = server['host_name']
+
+        return "http://%s/tag_live_monitor/%s/%s/%s" % (host, channel['customer_name'], channel['channel_name'], stream['name'])

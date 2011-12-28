@@ -13,7 +13,7 @@ html
     padding: 10px;
     background-color: white;
     position: relative;
-    top: 30px;
+    top: 45px;
     -webkit-box-shadow: 2px 2px 1px #999;
     box-shadow: 2px 2px 1px #999;
     -moz-box-shadow: 2px 2px 1px #999;
@@ -27,8 +27,10 @@ html
     color: white;
     margin: 0 auto;
     width: 100%;
-    height: 30px;
+    height: 45px;
     z-index: 2;
+    font-size: 12px;
+    padding-left: 4px;
 }
 
 #home #sample_ajax_status
@@ -67,6 +69,20 @@ html
 {
     width: 16px;
     height: 16px;
+}
+
+.level1 .status_icon
+{
+    background-color: red;
+}
+
+.level2 .status_icon
+{
+    background-color: yellow;
+}
+
+.level3 .status_icon
+{
     background-color: green;
 }
 

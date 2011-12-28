@@ -15,17 +15,18 @@ class Analyzer:
         ret = {"score": 0, "sample": None}
 
         if http_response.header['code'] != 200:
+            ret['score_level'] = 1
             ret['is_failed'] = True
-            ret['sample'], ret['score_detail'], ret['score_level'], ret['cal_data'] = self._build_failed_data(sample_time, http_response.header['code_des'])
+            ret['sample'], ret['score_detail'], ret['score_level_detail'], ret['cal_data'] = self._build_failed_data(sample_time, http_response.header['code_des'])
             return ret
 
         ret['sample'] = parser.parse_ms_monitor_result(http_response.body)
         ret['sample']['sample_time'] = sample_time
 
-        samples = copy.copy(exists_samples)
+        samples = list(exists_samples)
         samples.insert(0, ret['sample'])
 
-        ret['score'], ret['score_detail'] = self._cal_score(samples)
+        ret['score'], ret['score_level'], ret['score_detail'], ret['score_level_detail'] = self._cal_score(sample_time, http_response, samples)
         ret['is_failed'] = False
         ret['cal_data'] = self._get_cal_data(samples)
         return ret
@@ -83,10 +84,10 @@ class Analyzer:
                 },
                 # score level
                 {
-                    "stream_level": 1,
-                    "upstream_level": 1,
-                    "downstream_level": 1,
-                    "live_delay_level": 1
+                    "stream": 1,
+                    "upstream": 1,
+                    "downstream": 1,
+                    "live_delay": 1
                 },
                 # cal data
                 {
@@ -100,17 +101,17 @@ class Analyzer:
               )
 
 
-    def _cal_score(self, samples):
+    def _cal_score(self, sample_time, http_response, samples):
         current_sample = samples[0]
         data_rate = current_sample['stream_info_audiodatarate'] + current_sample['stream_info_videodatarate']
 
         score = 0
-        unused1, score_detail, score_level, unused2 = self._build_failed_data()
+        unused1, score_detail, score_level_detail, unused2 = self._build_failed_data(sample_time, http_response.header['code_des'])
 
         #cal stream score
         if data_rate <= 0:
             score = 0
-            return (score, score_detail)
+            return (score, 1, score_detail, score_level_detail)
 
         score_detail['stream_value'] = 100
 
@@ -127,10 +128,28 @@ class Analyzer:
 
         #TODO: live_delay
         score_detail['live_delay_value'] = int((10000 - current_sample["live_delay_ms"]) / float(10000) * 100)
+        if score_detail['live_delay_value'] < 0:
+            score_detail['live_delay_value'] = 0
 
         score = 0.8 * score_detail['upstream_value'] + 0.0 * score_detail['downstream_value'] + 0.2 * score_detail['live_delay_value']
 
-        return (int(score), score_detail)
+        score_level = self._get_level(score, (20, 90))
+
+        score_level_detail = {
+                "upstream": self._get_level(score_detail['upstream_value'], (20, 90)),
+                "live_delay": self._get_level(score_detail['live_delay_value'], (20, 90))
+                }
+
+        return (int(score), score_level, score_detail, score_level_detail)
+
+    def _get_level(self, score, sp):
+        score_level = 1
+        if score > sp[0] and score < sp[1]:
+            return 2
+        elif score > sp[1]:
+            return 3
+
+        return score_level
 
     def _get_current_upstream_kbps(self, samples, sample_use):
         return self._get_current_kbps(samples, True, sample_use)

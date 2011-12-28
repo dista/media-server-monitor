@@ -43,24 +43,20 @@ class samples:
 
         if int(page_size) != 0:
             sql += " limit %d, %d" % (offset, page_size)
-            
+
         streams = db.query(sql)
 
-        ret_streams = {}
+        ret_streams = []
         for stream in streams:
             sample_result = db.query("SELECT * FROM mms_samples where mms_stream_id = %d order by id desc limit 1" % stream['id'])
 
-            sample = None
-            try:
-                sample = sample_result.next()
-                del sample['id'], sample['mms_stream_id']
-            except Exception:
-                pass
+            samples = [ i for i in sample_result ]
 
-            if sample != None:
-                ret_streams[str(stream['stream_id'])] = stream.update(sample)
+            if samples != None and len(samples) > 0:
+                stream.update(samples[0])
             else:
-                ret_streams[str(stream['stream_id'])] = stream
+                stream.update({"average_upstream_kbps": 0, "average_downstream_kbps": 0, "total_gops": 0, "stream_info_audiodatarate": 0, "stream_info_videodatarate": 0})
+            ret_streams.append(stream)
                 
         return json.dumps({"total_samples": len(ret_streams), 'samples': ret_streams}, cls=json_handler.ExtendedEncoder)
 

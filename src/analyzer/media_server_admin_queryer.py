@@ -26,13 +26,18 @@ class MediaServerAdminQueryer(HttpClient):
         else:
             self.analyze_result = {
                                   "score": 0,
+                                  "score_level": 1,
                                   "is_failed": True
                                   }
-            self.analyze_result['sample'], self.analyze_result['score_detail'], self.analyze_result['score_level'], self.analyze_result['cal_data'] = self.analyzer.get_failed_data(self.sample_time, "socket error")
-        self.analyze_result['sample']['mms_stream_id'] = self.stream_id
+            self.analyze_result['sample'], self.analyze_result['score_detail'], self.analyze_result['score_level_detail'], self.analyze_result['cal_data'] = self.analyzer.get_failed_data(self.sample_time, "socket error")
 
     def _get_exist_samples(self):
         sm = StreamModel()
         
-        #TODO
-        stream = sm.get_by_stream_id()
+        stream = sm.get_by_stream_id(self.stream_id)
+
+        if len(stream) == 0:
+            return []
+
+        sp_model = SampleModel()
+        return sp_model.get_by_mms_stream_id(stream[0]['id'])

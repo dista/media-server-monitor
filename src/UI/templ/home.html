@@ -14,9 +14,13 @@ $def with(web, samples)
     </head>
     <body id='home'>
         <div id='head'>
+            <div style='float: left; padding-top: 4px;'>
+                <div>流状态标示（<span style='color: red;'>红色</span>：不正常，<span style='color: yellow;'>黄色</span>：可能有问题，<span style='color: green;'>绿色</span>：正常)</div>
+                <div>2个状态标示分别为：上游速度，直播延迟, 请根据2个标示综合判断流状态</div>
+            </div>
             <div id='sample_ajax_status' class='left' style='display: none;'></div>
             <div class='right' id='refresh_container'>
-                    <span>每</span><span id='refresh_time'></span><span style='margin-right: 10px;'>秒刷新一次</span>
+                    <span>本页面每</span><span id='refresh_time'></span><span style='margin-right: 10px;'>秒刷新一次, 系统后台3秒取一次样</span>
                     <button name='toggle_refresh' id='toggle_refresh'>停止</button><span>自动刷新</span>
             </div>
             <div id='notify' style='display: none;'>已获取最新数据</div>

@@ -57,7 +57,9 @@ def execute(query_str, args = None):
     try:
         cursor = connection.cursor(MySQLdb.cursors.DictCursor)
 
+        #log.debug(query_str)
         cursor.execute(query_str, args)
+        connection.commit()
         return cursor.fetchall()
 
     except MySQLdb.Error, e:        
@@ -101,9 +103,9 @@ class DbPool:
         setattr(sys.modules[__name__], "pool", self)
     
     def get_one(self):
-        self.logger.debug("%s AC lock" % threading.current_thread())
+        #self.logger.debug("%s AC lock" % threading.current_thread())
         self.lock.acquire()
-        self.logger.debug("%s ACED lock" % threading.current_thread())
+        #self.logger.debug("%s ACED lock" % threading.current_thread())
         
         ret = self._get_alive_connection(self.pools)
         
@@ -112,10 +114,14 @@ class DbPool:
             self.lock.release()
             return ret
         
-        ret = self._gen_one_connection()
-        self.logger.debug("%s RL lock" % threading.current_thread())
-        self.lock.release()
-        self.logger.debug("%s RLED lock" % threading.current_thread())
+        try:
+            ret = self._gen_one_connection()
+        except MySQLdb.Error, e:
+            raise e
+        finally:
+            #self.logger.debug("%s RL lock" % threading.current_thread())
+            self.lock.release()
+            #self.logger.debug("%s RLED lock" % threading.current_thread())
 
         if ret != None:
             return ret
@@ -123,39 +129,39 @@ class DbPool:
         while True:
             ev = threading.Event()
             
-            self.logger.debug("%s AC queue lock" % threading.current_thread())
+            #self.logger.debug("%s AC queue lock" % threading.current_thread())
             self.event_queue_lock.acquire()
-            self.logger.debug("%s ACED queue lock" % threading.current_thread())
+            #self.logger.debug("%s ACED queue lock" % threading.current_thread())
             self.event_queue.append(ev)
-            self.logger.debug("%s RL queue lock" % threading.current_thread())
+            #self.logger.debug("%s RL queue lock" % threading.current_thread())
             self.event_queue_lock.release()
-            self.logger.debug("%s RLED queue lock" % threading.current_thread())
+            #self.logger.debug("%s RLED queue lock" % threading.current_thread())
             
-            self.logger.debug("wait for event")
+            #self.logger.debug("wait for event")
             ev.wait()
-            self.logger.debug("event wait done")
+            #self.logger.debug("event wait done")
             
-            self.logger.debug("%s AC top pool lock" % threading.current_thread())
+            #self.logger.debug("%s AC top pool lock" % threading.current_thread())
             self.top_pools_lock.acquire()
-            self.logger.debug("%s ACED top pool lock" % threading.current_thread())
+            #self.logger.debug("%s ACED top pool lock" % threading.current_thread())
             ret = self._get_alive_connection(self.top_pools)
-            self.logger.debug("GOT connection from top_pools")
+            #self.logger.debug("GOT connection from top_pools")
             if ret:
                 ret.set_used_status(True)
-            self.logger.debug("%s RL top pool lock" % threading.current_thread())
+            #self.logger.debug("%s RL top pool lock" % threading.current_thread())
             self.top_pools_lock.release()
-            self.logger.debug("%s RLED top pool lock" % threading.current_thread())
+            #self.logger.debug("%s RLED top pool lock" % threading.current_thread())
             if ret:
                 return ret
             else:
                 # the connection user released may lost connection
-                self.logger.debug("%s AC lock" % threading.current_thread())
+                #self.logger.debug("%s AC lock" % threading.current_thread())
                 self.lock.acquire()
-                self.logger.debug("%s ACED lock" % threading.current_thread())
+                #self.logger.debug("%s ACED lock" % threading.current_thread())
                 ret = self._gen_one_connection()
-                self.logger.debug("%s RL lock" % threading.current_thread())
+                #self.logger.debug("%s RL lock" % threading.current_thread())
                 self.lock.release()
-                self.logger.debug("%s RLED lock" % threading.current_thread())
+                #self.logger.debug("%s RLED lock" % threading.current_thread())
 
                 if ret:
                     return ret
@@ -170,8 +176,9 @@ class DbPool:
                 self.current_dbc_number += 1
                 self.pools.append(ret)
                 ret.set_used_status(True)
-            except MySQLdb.MySQLError:
+            except MySQLdb.Error, e:
                 self.logger.debug("Mysql Error, %s" % traceback.format_exc())
+                raise e
             
             return ret
         else:
@@ -180,15 +187,15 @@ class DbPool:
     def release(self, db_connection):
         in_top = self._is_connection_in_top(db_connection)
         
-        self.logger.debug("%s AC lock" % threading.current_thread())
+        #self.logger.debug("%s AC lock" % threading.current_thread())
         self.lock.acquire()
-        self.logger.debug("%s ACED lock" % threading.current_thread())
-        self.logger.debug("%s AC queue lock" % threading.current_thread())
+        #self.logger.debug("%s ACED lock" % threading.current_thread())
+        #self.logger.debug("%s AC queue lock" % threading.current_thread())
         self.event_queue_lock.acquire()
-        self.logger.debug("%s ACED queue lock" % threading.current_thread())
-        self.logger.debug("%s AC top pool lock" % threading.current_thread())
+        #self.logger.debug("%s ACED queue lock" % threading.current_thread())
+        #self.logger.debug("%s AC top pool lock" % threading.current_thread())
         self.top_pools_lock.acquire()
-        self.logger.debug("%s ACED top pool lock" % threading.current_thread())
+        #self.logger.debug("%s ACED top pool lock" % threading.current_thread())
         
         db_connection.set_used_status(False)
         
@@ -199,7 +206,7 @@ class DbPool:
                 self.top_pools.append(db_connection)
                 self.pools.remove(db_connection)
                 
-            self.logger.debug("event is notified")
+            #self.logger.debug("event is notified")
             ev.set()
         else:
             if in_top:
@@ -207,15 +214,15 @@ class DbPool:
                 self.pools.append(db_connection)
                 
 
-        self.logger.debug("%s RL top pool lock" % threading.current_thread())
+        #self.logger.debug("%s RL top pool lock" % threading.current_thread())
         self.top_pools_lock.release()
-        self.logger.debug("%s RLED top pool lock" % threading.current_thread())
-        self.logger.debug("%s RL queue lock" % threading.current_thread())
+        #self.logger.debug("%s RLED top pool lock" % threading.current_thread())
+        #self.logger.debug("%s RL queue lock" % threading.current_thread())
         self.event_queue_lock.release()
-        self.logger.debug("%s RLED queue lock" % threading.current_thread())
-        self.logger.debug("%s RL lock" % threading.current_thread())
+        #self.logger.debug("%s RLED queue lock" % threading.current_thread())
+        #self.logger.debug("%s RL lock" % threading.current_thread())
         self.lock.release()
-        self.logger.debug("%s RLED lock" % threading.current_thread())
+        #self.logger.debug("%s RLED lock" % threading.current_thread())
             
     def _is_connection_in_top(self, connection):
         try:

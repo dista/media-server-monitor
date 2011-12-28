@@ -2,10 +2,14 @@
 from analyzer.media_server_admin_queryer import MediaServerAdminQueryer
 from exception import *
 import asyncore, socket
+from common.http import HttpResponse
 from analyzer.analyzer import Analyzer
+from common import parser
+from datetime import datetime
+import os
 
 def test_00():
-    url = "http://10.33.0.59/tag_live_monitor/tvie/test1/test2"
+    url = "http://10.33.0.57/tag_live_monitor/tvie/zhso/xfw"
     stream_id = 0
 
     _map = {}

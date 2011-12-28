@@ -2,7 +2,9 @@ import json
 
 config = {
         "monitor_cdn_in_api": True,
-        "monitor_cnd_in_api_start_stream_id": 10000,
+        "get_stream_api_url": "",
+        "read_token": "",
+        "extra_streams_path": " http://10.33.0.57/api/service/media/channels/find",
         "db": {
             "host": "10.33.0.57",
             "port": 3306,

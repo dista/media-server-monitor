@@ -11,20 +11,14 @@ class SampleModel:
     def __init__(self):
         self.model_name = "mms_samples"
         
-    def add(self, stream):
-        pass
-    
-    def update(self, id, stream):
-        pass
-    
     def delete_by_stream_ids(self, mms_stream_ids):
         if mms_stream_ids == None or len(mms_stream_ids) == 0:
             return True
 
-        db.execute("DELETE FROM %s WHERE mms_stream_id in (%s)" % (self.model_name, ", ".joins(mms_stream_ids)))
+        db.execute("DELETE FROM %s WHERE mms_stream_id in (%s)" % (self.model_name, ", ".join([str(i) for i in mms_stream_ids])))
     
-    def get_by_stream_id(self, stream_id):
-        pass
+    def get_by_mms_stream_id(self, mms_stream_id):
+        return db.execute("SELECT * FROM %s WHERE mms_stream_id = %d" % (self.model_name, mms_stream_id))
     
     def get_by_id(self, id):
         pass
@@ -36,7 +30,7 @@ class SampleModel:
         self._delete_if_exceed(sample['mms_stream_id'], 100)
 
     def _delete_if_exceed(self, mms_stream_id, num):
-        result = db.execute("SELECT count(*) FROM %s where mms_stream_id = %d" % mms_stream_id)
+        result = db.execute("SELECT count(*) FROM %s where mms_stream_id = %d" % (self.model_name, mms_stream_id))
         exists_num = result[0]['count(*)']
 
         if exists_num <= num:

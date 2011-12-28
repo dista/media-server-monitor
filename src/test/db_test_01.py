@@ -10,7 +10,7 @@ import time
 import sys
 from logger import Logger
 
-host = "10.33.0.228"
+host = "10.33.0.57"
 port = 3306
 name = "tvie"
 password = "tvierocks"
@@ -37,7 +37,7 @@ class TestThread(threading.Thread):
         
 def one_connection_pool_and_two_threads():
     max_db = 1
-    db_pool = DbPool(max_db, host, port, name, password, db_name, logger)
+    db_pool = DbPool(max_db, host, port, name, password, db_name)
     
     th1 = TestThread(db_pool, "thread 1")
     th2 = TestThread(db_pool, "thread 2")

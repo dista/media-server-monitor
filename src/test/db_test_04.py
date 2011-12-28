@@ -16,8 +16,8 @@ logger = Logger(None, 0)
 def test_01():
     DbPool(4, host, port, name, password, db_name)
 
-    result = db.execute("SELECT LAST_INSERT_ID()")
-    print result
+    result = db.execute("SELECT * FROM mms_stream where id=88")
+    print len(result) == 0
 
 if __name__ == "__main__":
     test_01()

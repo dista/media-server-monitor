@@ -1,38 +1,44 @@
 $def with(samples)
 <table style='position: relative; top: -1px;'>
     <tbody>
-    $for k in samples['samples']:
+    $for sample in samples['samples']:
         <tr class='simple'>
-            <td class='status_container'>
+            <td class='status_container level$sample["score_level_upstream"]'>
                 <div class='upstream_status status_icon' title='上游速率状态'>
                 </div>
             </td>
-            <td class='status_container'>
+            <td class='status_container level$sample["score_level_live_delay"]'>
                 <div class='live_delay_status status_icon' title='接受上游延迟状态'>
                 </div>
             </td>
             <td class='stream_name'>
-                <div class='unify_name'>$samples['samples'][k]["unify_name"]</div>
-                <div class='sample_interface'>$samples['samples'][k]["sample_interface"]</div>
+                <div class='unify_name'>$sample["unify_name"]</div>
+                <div class='sample_interface'>$sample["sample_interface"]</div>
             </td>
             <td class='sample_time' title='上次更新时间'>
-                $samples['samples'][k]['sample_time']
+                $sample['last_sample_time']
             </td>
         </tr>
         <tr class='detail'>
             <td colspan=4>
+                </div>
+                    <span>视频datarate</span>
+                    <span>$sample['stream_info_videodatarate']kbps</span>
+                    <span class='margin-left-4'>音频datarate</span>
+                    <span>$sample['stream_info_audiodatarate']kbps</span>
+                </div>
                 <div>
                     <div class='left detail_title'>上游平均速率</div>
                     <div class='left'>
                         <div>
                             <span class='upstream_rate' style='margin-left: 0;'>前3秒:</span>
-                            <span>$samples['samples'][k]['average_upstream_kbps']['last_3'] kbps</span>
+                            <span>$sample['average_upstream_kbps_3'] kbps</span>
                             <span class='upstream_rate'>前10秒:</span>
-                            <span>$samples['samples'][k]['average_upstream_kbps']['last_10'] kbps</span>
+                            <span>$sample['average_upstream_kbps_10'] kbps</span>
                             <span class='upstream_rate'>前100秒:</span>
-                            <span>$samples['samples'][k]['average_upstream_kbps']['last_100'] kbps</span>
+                            <span>$sample['average_upstream_kbps_100'] kbps</span>
                             <span class='upstream_rate'>启动至今</span>
-                            <span>$samples['samples'][k]['average_upstream_kbps']['total'] kbps</span>
+                            <span>$sample['average_upstream_kbps'] kbps</span>
                         </div>
                     </div>
                     <div class='clear'></div>
@@ -42,37 +48,37 @@ $def with(samples)
                     <div class='left'>
                         <div>
                             <span class='upstream_rate' style='margin-left: 0;'>前3秒:</span>
-                            <span>$samples['samples'][k]['average_downstream_kbps']['last_3'] kbps</span>
+                            <span>$sample['average_downstream_kbps_3'] kbps</span>
                             <span class='upstream_rate'>前10秒:</span>
-                            <span>$samples['samples'][k]['average_downstream_kbps']['last_10'] kbps</span>
+                            <span>$sample['average_downstream_kbps_10'] kbps</span>
                             <span class='upstream_rate'>前100秒:</span>
-                            <span>$samples['samples'][k]['average_downstream_kbps']['last_100'] kbps</span>
+                            <span>$sample['average_downstream_kbps_100'] kbps</span>
                             <span class='upstream_rate'>启动至今</span>
-                            <span>$samples['samples'][k]['average_downstream_kbps']['total'] kbps</span>
+                            <span>$sample['average_downstream_kbps'] kbps</span>
                         </div>
                     </div>
                     <div class='clear'></div>
                 </div>
                     <span>上游得分</span>
-                    <span>$samples['samples'][k]['score_detail']['upstream']</span>
+                    <span>$sample['score_upstream']</span>
                     <span class='margin-left-4'>上游延迟得分</span>
-                    <span>$samples['samples'][k]['score_detail']['live_delay']</span>
+                    <span>$sample['score_live_delay']</span>
                     <span>上游收到gop数</span>
-                    <span>$samples['samples'][k]['total_gops']</span>
+                    <span>$sample['total_gops']</span>
                     <span class='margin-left-4'>连上上游次数</span>
-                    <span>$samples['samples'][k]['upstream_connected_count']</span>
+                    <span>$sample['upstream_connected_count']</span>
                     <span class='margin-left-4'>连接上游失败次数</span>
-                    <span>$samples['samples'][k]['upstream_connection_fail_count']</span>
+                    <span>$sample['upstream_connection_fail_count']</span>
                     <span class='margin-left-4'>接收上游字节总数</span>
-                    <span>$samples['samples'][k]['upstream_bytes_received']</span>
+                    <span>$sample['upstream_bytes_received']</span>
                     <span class='margin-left-4'>接收上游延迟(ms)</span>
-                    <span>$samples['samples'][k]['live_delay_ms']</span>
+                    <span>$sample['live_delay_ms']</span>
                 </div>
                 <div>
                     <span>服务用户总数</span>
-                    <span>$samples['samples'][k]['total_clients_served']</span>
+                    <span>$sample['total_clients_served']</span>
                     <span class='margin-left-4'>总计发送字节数</span>
-                    <span>$samples['samples'][k]['total_bytes_sent']</span>
+                    <span>$sample['total_bytes_sent']</span>
                 </div>
             </td>
         </tr>

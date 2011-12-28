@@ -1,18 +1,23 @@
-def build_insert_values(obj):
-    keys = "( %s )" % (", ".join(obj.keys()))
+def build_insert_values(obj_list):
+    if obj_list == None or len(obj_list) == 0:
+        raise Exception("parameter should be a list contains dict")
+
+    keys = "( %s )" % (", ".join(obj_list[0].keys()))
     values = ""
 
-    for o in obj:
+    for o in obj_list:
         val = "( "
-        for v in o.items():
-            if any([isinstance(o[key], cls) for cls in [str, unicode]]):
+        for k in o.keys():
+            v = o[k]
+            if any([isinstance(v, cls) for cls in [str, unicode]]):
                 val += "'%s', " % v
             else:
                 val += "%s, " % v
 
-        val.rstrip(', ') + " )"
-    values  += val + ","
 
-    values.rstrip(",")
+        val = val.rstrip(", ") + " )"
+        values  += val + ","
 
-    return "% VALUES %s" % (keys, values)
+    values = values.rstrip(",")
+
+    return "%s VALUES %s" % (keys, values)

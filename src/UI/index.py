@@ -1,6 +1,8 @@
 import web
 from os import path
 import json
+import urllib2
+import json
 
 urls = (
         "", "home",
@@ -35,6 +37,7 @@ def get_file_contents(file_path):
 def load_samples():
     samples = web.template.frender(path.join(mms_ui_root, 'templ/samples.html'))
 
+    '''
     one_sample = {
                     'stream_id': 10001,
                     'sample_interface': 'http://test.zz',
@@ -90,7 +93,15 @@ def load_samples():
     
     for i in xrange(10000, 10030):
         fake_data['samples'][str(i)] = one_sample
-    return samples(fake_data)
+
+    '''
+
+    url = "http://localhost:8080/mms/api/samples/0-0/null/stream_id/asc/1"
+    request = urllib2.Request(url)
+    response = urllib2.urlopen(request)
+
+    samples_data = json.loads(response.read()) 
+    return samples(samples_data)
 
 class home:
     def GET(self):
