@@ -1,0 +1,130 @@
+Supply a simple and reliable monitor service for TVie media server
+====================================================================
+
+Support media server version:
+2.0 and later
+
+Why do not simply retrieve information from TVie media server and display to user?
+because the request to media server may be timeout, and it will block subsquence requests.
+Also we want to supply other information than media server can give us
+
+table_design
+--------------------------
+
+mss_stream
+++++++++++++++++++++++
+id
+stream_id
+live_delay
+unify_name
+sample_interface
+
+mms_samples
+++++++++++++++++++++++
+id
+is_failed: [true / false]
+failed_reason: 
+mms_stream_id
+sample_time
+total_gops
+upstream_opened_count
+upstream_connected_count
+upstream_connection_fail_count
+upstream_bytes_received
+clients_connected
+total_clients_served
+total_bytes_sent
+live_delay_ms
+average_upstream_kbps
+average_downstream_kbps
+stream_info_audiodatarate
+stream_info_videodatarate
+stream_info_audiocodecid
+stream_info_audiosamplesize
+stream_info_audiosamplerate
+stream_info_stereo
+stream_info_videocodecid
+stream_info_framerate
+stream_info_width
+stream_info_height
+
+
+PYTHON BACKEND
+
+MMS_SAMPLER
++++++++++++++++++++++++++++++++++++++++++
+mms sampler is a routine who get the sample_interface from mms_stream table, retreive information from sample_interface,
+and add the retrieved information to mms_samples.
+mms_samples will only maintain 200 samples for each stream at most. It need to delete the older samples when the number of samples exceed. 
+
+MMS_Stream_Updater
++++++++++++++++++++++++++++++++++++++++++
+updater call get_all_channels of TVie media server api every 1 minuts, 
+kill the MMS_SAMPLER routine if it does not exits any longer.
+
+NEED TO Consider:
+Use thread for MSS_SAMPLER OR *NOT* ? I do no want to use thread, if python supply async http library, I will use that.
+
+PHP
+
+Sevice Interface
+  http://$host/samples/{$offset}-{$page_size}/${keyword}/{$sort_by}/${sort_order}/${sort_by_status_first}
+* samples
+  parameters: offset, page_size, keyword(match sample_interface), sort_by, sort_order, sort_by_status_first[0,1]
+  output:
+  {
+      total_samples:
+      samples:
+	  [
+	      $mms_stream_id: {
+		      stream_id
+			  sample_interface
+              unify_name
+			  avarage_downstream_kbps:
+			  avarage_upstream_kbps {"last_3": "last_10": "last_100", "total":}
+			  last_sample_time:
+			  score:      # a suggest value need to be tested and tuned in real enviroment. number [ 0 - 100], the larger, the better
+              score_level: [0, 1, 2] 0: bad, 1: meet a little problem, 2: good
+              score_detail:
+              {
+                  live_delay:
+                  upstream:
+              }
+              sample_time
+              total_gops
+              upstream_opened_count
+              upstream_connected_count
+              upstream_connection_fail_count
+              upstream_bytes_received
+              clients_connected
+              total_clients_served
+              total_bytes_sent
+              live_delay_ms
+              average_upstream_kbps
+              average_downstream_kbps
+              stream_info_audiodatarate
+              stream_info_videodatarate
+              stream_info_audiocodecid
+              stream_info_audiosamplesize
+              stream_info_audiosamplerate
+              stream_info_stereo
+              stream_info_videocodecid
+              stream_info_framerate
+              stream_info_width
+              stream_info_height
+		  }
+	  ]
+  }
+  
+  NOTE: last_* may be -1 because there is bad result from media server
+
+Score caculate:
+if the http request return code is not 200, then the score is 0, and detail score is 0
+
+LIVE_DELAY_VALUE: int((10 * 1000 - live_delay) / float(10000) * 100)
+                  
+UPSTREAM_VALUE:   MIN( (upstream_bytes_received2 - upstream_bytes_received1) / (sample_time2 - sample_time1) / (stream_info_audiodatarate + stream_info_videodatarate), 100)
+
+  
+FRONT:
+A single page that will display all information, no page, search by using browser's native CTRL+f find feature.

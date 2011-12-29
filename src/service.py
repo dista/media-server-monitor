@@ -7,6 +7,7 @@ Created on 2011-12-18
 import api.index
 import UI.index
 import web
+import conf
 
 urls = (
         "/mms/ui", UI.index.app,

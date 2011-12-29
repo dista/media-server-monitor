@@ -3,6 +3,12 @@ from os import path
 import json
 import urllib2
 import json
+import conf
+import config_reader
+
+cr = config_reader.ConfigReader()
+config = cr.read_config_as_dict(conf.CONFIG_PATH)
+
 
 urls = (
         "", "home",
@@ -11,7 +17,7 @@ urls = (
         "/static/.*", "static"
         )
 
-mms_ui_root = "/root/media-server-monitor/src/UI/"
+mms_ui_root = config['ui_dir']
 
 def get_content_type(path_info):
     last = path_info.split('/')[-1]
@@ -37,66 +43,7 @@ def get_file_contents(file_path):
 def load_samples():
     samples = web.template.frender(path.join(mms_ui_root, 'templ/samples.html'))
 
-    '''
-    one_sample = {
-                    'stream_id': 10001,
-                    'sample_interface': 'http://test.zz',
-                    'unify_name': '10.33.0.28/tvie/channel1/sd',
-                    'average_downstream_kbps': {
-                        "last_3": 100,
-                        "last_10": 200,
-                        "last_100": 150,
-                        "total": 120
-                        },
-                    'average_upstream_kbps': {
-                        "last_3": 100,
-                        "last_10": 200,
-                        "last_100": 150,
-                        "total": 120
-                        },
-                    'score': 50,
-                    'score_level': 2,
-                    'score_detail': {
-                        'live_delay': 10,
-                        'upstream': 90
-                        },
-                    'score_level_detail': {
-                        'live_delay': 1,
-                        'upstream': 3
-                        },
-                    'sample_time': '2011/12/11 02:23:12',
-                    "total_gops": 100123,
-                    "upstream_opened_count": 21,
-                    "upstream_connected_count": 23,
-                    "upstream_connection_fail_count": 23,
-                    "upstream_bytes_received": 32252,
-                    "clients_connected": 445,
-                    "total_clients_served": 234,
-                    "total_bytes_sent": 812,
-                    "live_delay_ms": 235,
-                    "stream_info_audiodatarate": 152,
-                    "stream_info_videodatarate": 233,
-                    "stream_info_audiocodecid": 658,
-                    "stream_info_audiosamplesize": 16,
-                    "stream_info_audiosamplerate": 4422,
-                    "stream_info_stereo": 235,
-                    "stream_info_videocodecid": 2414,
-                    "stream_info_framerate": 812,
-                    "stream_info_width": 235,
-                    "stream_info_height": 235
-                    }
-    fake_data = {
-            "total_samples": 30,
-            "samples": {
-                }
-            }
-    
-    for i in xrange(10000, 10030):
-        fake_data['samples'][str(i)] = one_sample
-
-    '''
-
-    url = "http://localhost:8080/mms/api/samples/0-0/null/stream_id/asc/1"
+    url = "http://localhost:%d/mms/api/samples/0-0/null/stream_id/asc/1" % config['port']
     request = urllib2.Request(url)
     response = urllib2.urlopen(request)
 

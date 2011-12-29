@@ -28,8 +28,8 @@ class StreamMonitorThread(threading.Thread):
             streams = self.get_streams()
             
             if not streams:
-                self.logger.error("StreamMonitorThread: fail to get streams, exit the thread")
-                return
+                self.logger.error("StreamMonitorThread: fail to get streams, it will try again")
+                continue
 
             current_streams_ids = [stream['stream_id'] for stream in streams]
 

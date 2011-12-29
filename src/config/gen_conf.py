@@ -2,11 +2,13 @@ import json
 
 config = {
         "monitor_cdn_in_api": True,
-        "get_stream_api_url": "",
-        "read_token": "",
-        "extra_streams_path": " http://10.33.0.57/api/service/media/channels/find",
+        "get_stream_api_url": "http://#API_HOST_NAME/api/service/media/channels/find", 
+        "read_token": "#READ_TOKEN",
+        "port": 10294,
+        "ui_dir": "/usr/local/tvie/www/mms/UI",
+        "extra_streams_path": "",
         "db": {
-            "host": "10.33.0.57",
+            "host": "#DB_HOST",
             "port": 3306,
             "user": "tvie",
             "password": "tvierocks",

@@ -10,7 +10,6 @@ import json
 from config_reader import ConfigReader
 from common import json_handler
 
-CONFIG_PATH = "/usr/local/tvie/config/media-server-monitor.conf"
 cr = ConfigReader()
 config = cr.read_config_as_dict(conf.CONFIG_PATH)
 
